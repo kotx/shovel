@@ -1,0 +1,14 @@
+[package]
+name = "shovel"
+version = "0.1.0"
+authors = ["Kot"]
+description = "Shovels pixels into some IPV6 space with ICMP"
+edition = "2021"
+
+[dependencies]
+async-recursion = "1.0.0"
+clap = { version = "4.0.32", features = ["derive", "cargo"] }
+image = { version = "0.24.5", features = ["avif-decoder"] }
+rand = "0.8.5"
+surge-ping = "0.7.3"
+tokio = { version = "1.23.0", features = ["full"] }
