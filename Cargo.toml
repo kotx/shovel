@@ -6,9 +6,8 @@ description = "Shovels pixels into some IPV6 space with ICMP"
 edition = "2021"
 
 [dependencies]
-async-recursion = "1.0.0"
 clap = { version = "4.0.32", features = ["derive", "cargo"] }
 image = "0.24.5"
-rand = "0.8.5"
-surge-ping = "0.7.3"
-tokio = { version = "1.23.0", features = ["full"] }
+rayon = "1.6.1"
+socket2 = { version = "0.4.7", features = ["all"] }
+tungstenite = { version = "0.18.0", features = ["native-tls"] }
