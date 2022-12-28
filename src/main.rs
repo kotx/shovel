@@ -3,7 +3,7 @@
 mod icmp;
 mod place;
 
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use clap::Parser;
 use icmp::ping_v6;
@@ -54,7 +54,7 @@ fn main() {
         let canvas = canvas.read().unwrap();
 
         if let Some(canvas) = canvas.as_ref() {
-            pixels.par_sort_by_cached_key(|px| {
+            pixels.par_sort_unstable_by_key(|px| {
                 let canvas_color = &canvas.get_pixel(px.0, px.1).0.map(u16::from);
                 let px_color = &px.2.0.map(u16::from);
 
@@ -72,9 +72,10 @@ fn main() {
         pixels
             .iter()
             .map(|px| pixel_to_addr(px, 1))
-            .array_chunks::<64>()
+            .array_chunks::<8000>()
             .for_each(|addrs| {
                 addrs.par_iter().for_each(|&addr| ping_v6(addr));
+                std::thread::sleep(Duration::from_millis(50));
             });
     }
 }
