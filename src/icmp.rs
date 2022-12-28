@@ -2,7 +2,7 @@ use std::net::{Ipv6Addr, SocketAddrV6};
 
 use socket2::{Domain, Protocol, Socket, Type};
 
-const ICMP_PACKET: [u8; 8] = [0x45, 0x00, 0x00, 0x54, 0xee, 0x96, 0x40, 0x00];
+const ICMP_PACKET: [u8; 8] = [8, 0, 0, 0, 0, 0, 0, 0];
 
 pub fn ping_v6(addr: Ipv6Addr) {
     Socket::new(Domain::IPV6, Type::RAW, Some(Protocol::ICMPV6))

@@ -1,10 +1,14 @@
+use image::Rgba;
+pub type Pixel = (u32, u32, Rgba<u8>);
+
 pub mod util {
-    use image::Rgba;
     use std::{net::Ipv6Addr, str::FromStr};
+
+    use super::Pixel;
 
     const IP_FORMAT: &str = "2a06:a003:d040:SXXX:YYY:RR:GG:BB";
 
-    pub fn pixel_to_addr(px: (u32, u32, Rgba<u8>), size: usize) -> Ipv6Addr {
+    pub fn pixel_to_addr(px: &Pixel, size: usize) -> Ipv6Addr {
         let x = px.0;
         let y = px.1;
 
@@ -38,33 +42,34 @@ pub mod util {
 pub mod canvas {
     use std::{
         net::TcpStream,
-        sync::{Arc, Mutex},
+        sync::{Arc, RwLock},
     };
 
-    use image::{imageops::overlay, DynamicImage, ImageFormat};
+    use image::{imageops::overlay, ImageFormat, RgbaImage};
     use tungstenite::{connect, stream::MaybeTlsStream, WebSocket};
 
     const WEBSOCKET_ADDRESS: &str = "wss://v6.sys42.net/ws";
 
-    pub type Canvas = Option<DynamicImage>;
-
     pub struct CanvasClient {
-        pub canvas: Arc<Mutex<Canvas>>,
+        pub canvas: Arc<RwLock<Option<RgbaImage>>>,
         ws: WebSocket<MaybeTlsStream<TcpStream>>,
     }
 
     impl CanvasClient {
         pub fn new() -> CanvasClient {
             CanvasClient {
-                canvas: Arc::new(Mutex::new(None)),
+                canvas: Arc::new(RwLock::new(None)),
                 ws: connect(WEBSOCKET_ADDRESS).unwrap().0,
             }
         }
 
         pub fn setup(&mut self) {
             let init = self.ws.read_message().unwrap().into_data();
-            *self.canvas.lock().unwrap() =
-                Some(image::load_from_memory_with_format(&init, ImageFormat::Png).unwrap());
+            *self.canvas.write().unwrap() = Some(
+                image::load_from_memory_with_format(&init, ImageFormat::Png)
+                    .unwrap()
+                    .into_rgba8(),
+            );
         }
 
         pub fn recv(&mut self) {
@@ -74,17 +79,14 @@ pub mod canvas {
                 let delta_img = image::load_from_memory_with_format(&delta, ImageFormat::Png)
                     .expect("delta should convert to PNG image");
 
-                let mut canvas = self.canvas.lock().unwrap();
-
-                if canvas.is_none() {
+                if let Some(canvas) = self.canvas.write().unwrap().as_mut() {
+                    overlay(canvas, &delta_img, 0, 0);
+                } else {
                     panic!("Canvas must be initialized");
                 }
-
-                let canvas = canvas.as_mut().unwrap();
-                overlay(canvas, &delta_img, 0, 0);
             } else if msg.is_text() {
-                let text = msg.into_text().unwrap();
-                println!("{}", text);
+                // let text = msg.into_text().unwrap();
+                // println!("{}", text);
             }
         }
     }
