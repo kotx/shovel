@@ -48,7 +48,7 @@ pub mod canvas {
     use image::{imageops::overlay, ImageFormat, RgbaImage};
     use tungstenite::{connect, stream::MaybeTlsStream, WebSocket};
 
-    const WEBSOCKET_ADDRESS: &str = "wss://v6.sys42.net/ws";
+    const WEBSOCKET_ADDRESS: &str = "wss://v6staging.sys42.net/ws";
 
     pub struct CanvasClient {
         pub canvas: Arc<RwLock<Option<RgbaImage>>>,
