@@ -6,7 +6,7 @@ pub mod util {
 
     use super::Pixel;
 
-    const IP_FORMAT: &str = "2a06:a003:d040:SXXX:YYY:RR:GG:BB";
+    const IP_FORMAT: &str = "2602:fa9b:202:SXXX:YYY:RR:GG:BB";
 
     pub fn pixel_to_addr(px: &Pixel, size: usize) -> Ipv6Addr {
         let x = px.0;
