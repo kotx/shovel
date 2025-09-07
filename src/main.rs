@@ -13,6 +13,7 @@ use rayon::{
     prelude::{IntoParallelRefIterator, ParallelBridge, ParallelIterator},
     slice::ParallelSliceMut,
 };
+use tokio::runtime::Runtime;
 
 use crate::place::{Pixel, util::pixel_to_addr};
 
@@ -50,6 +51,8 @@ fn main() {
         .filter(|px| px.2[3] != 0 /* alpha 0 */)
         .collect();
 
+    let rt = Runtime::new().unwrap();
+
     loop {
         let canvas = canvas.read().unwrap();
 
@@ -75,7 +78,8 @@ fn main() {
             .array_chunks::<8000>()
             .for_each(|addrs| {
                 addrs.par_iter().for_each(|&addr| {
-                    smol::block_on(ping_v6(addr));
+                    let _guard = rt.enter();
+                    tokio::spawn(ping_v6(addr));
                 });
                 std::thread::sleep(Duration::from_millis(50));
             });
