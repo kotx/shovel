@@ -7,14 +7,14 @@ use std::{sync::Arc, time::Duration};
 
 use clap::Parser;
 use icmp::ping_v6;
-use image::{imageops::FilterType, GenericImageView};
+use image::{GenericImageView, imageops::FilterType};
 use place::canvas::CanvasClient;
 use rayon::{
     prelude::{IntoParallelRefIterator, ParallelBridge, ParallelIterator},
     slice::ParallelSliceMut,
 };
 
-use crate::place::{util::pixel_to_addr, Pixel};
+use crate::place::{Pixel, util::pixel_to_addr};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about)]
@@ -23,7 +23,8 @@ struct Args {
     file: std::path::PathBuf,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args = Args::parse();
 
     let mut img = image::open(args.file).unwrap();
@@ -74,7 +75,9 @@ fn main() {
             .map(|px| pixel_to_addr(px, 1))
             .array_chunks::<8000>()
             .for_each(|addrs| {
-                addrs.par_iter().for_each(|&addr| futures::executor::block_on(ping_v6(addr)));
+                addrs.par_iter().for_each(|&addr| {
+                    tokio::spawn(ping_v6(addr));
+                });
                 std::thread::sleep(Duration::from_millis(50));
             });
     }
