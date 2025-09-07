@@ -74,7 +74,7 @@ fn main() {
             .map(|px| pixel_to_addr(px, 1))
             .array_chunks::<8000>()
             .for_each(|addrs| {
-                addrs.par_iter().for_each(|&addr| ping_v6(addr));
+                addrs.par_iter().for_each(|&addr| futures::executor::block_on(ping_v6(addr)));
                 std::thread::sleep(Duration::from_millis(50));
             });
     }
