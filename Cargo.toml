@@ -9,6 +9,7 @@ edition = "2021"
 clap = { version = "4.0.32", features = ["derive", "cargo"] }
 image = "0.24.5"
 indicatif = "0.17.2"
+proc-macro2 = "1.0.101"
 rayon = "1.6.1"
 socket2 = { version = "0.4.7", features = ["all"] }
 tungstenite = { version = "0.18.0", features = ["native-tls"] }
