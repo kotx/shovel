@@ -45,8 +45,8 @@ pub mod canvas {
         sync::{Arc, RwLock},
     };
 
-    use image::{imageops::overlay, ImageFormat, RgbaImage};
-    use tungstenite::{connect, stream::MaybeTlsStream, WebSocket};
+    use image::{ImageFormat, RgbaImage, imageops::overlay};
+    use tungstenite::{WebSocket, connect, stream::MaybeTlsStream};
 
     const WEBSOCKET_ADDRESS: &str = "wss://ssi.place/ws";
 
@@ -64,6 +64,17 @@ pub mod canvas {
         }
 
         pub fn setup(&mut self) {
+            self.ws
+                .write_message(tungstenite::Message::Text(
+                    r#"{"request":"delta_canvas_stream","enabled":true}"#.to_string(),
+                ))
+                .unwrap();
+            self.ws
+                .write_message(tungstenite::Message::Text(
+                    r#"{"request":"get_full_canvas_once"}"#.to_string(),
+                ))
+                .unwrap();
+
             let init = self.ws.read_message().unwrap().into_data();
             *self.canvas.write().unwrap() = Some(
                 image::load_from_memory_with_format(&init, ImageFormat::Png)
