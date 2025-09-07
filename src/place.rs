@@ -30,7 +30,7 @@ pub mod util {
         let addr_str = IP_FORMAT
             .replace('S', &format!("{size:x}"))
             .replace("XXX", &format!("{x:03x}"))
-            .replace("YYY", &format!("{y:03x}"))
+            .replace("YYYY", &format!("{y:04x}"))
             .replace("RR", &format!("{r:02x}"))
             .replace("GG", &format!("{g:02x}"))
             .replace("BB", &format!("{b:02x}"));
